@@ -55,6 +55,7 @@ public class SmileyLoadingView extends View {
 
     private boolean mShowLeftEye, mShowRightEye;
     private boolean mStopUntilAnimationPerformCompleted;
+    private OnStatusChangedListener mOnStatusChangedListener;
 
     private ValueAnimator mValueAnimator;
 
@@ -190,6 +191,16 @@ public class SmileyLoadingView extends View {
     }
 
     /**
+     * Set paint color alpha
+     * @param alpha alpha
+     */
+    public void setAlpha(int alpha) {
+        mArcPaint.setAlpha(alpha);
+        mCirclePaint.setAlpha(alpha);
+        invalidate();
+    }
+
+    /**
      * Start animation
      */
     public void start() {
@@ -234,12 +245,18 @@ public class SmileyLoadingView extends View {
             @Override
             public void onAnimationEnd(Animator animation) {
                 mRunning = false;
+                if (mOnStatusChangedListener != null) {
+                    mOnStatusChangedListener.onCompleted();
+                }
                 reset();
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
                 mRunning = false;
+                if (mOnStatusChangedListener != null) {
+                    mOnStatusChangedListener.onCompleted();
+                }
                 reset();
             }
 
@@ -270,7 +287,19 @@ public class SmileyLoadingView extends View {
             if (!stopUntilAnimationPerformCompleted) {
                 mValueAnimator.end();
             }
+        } else {
+            if (mOnStatusChangedListener != null) {
+                mOnStatusChangedListener.onCompleted();
+            }
         }
+    }
+
+    /**
+     * set listener
+     * @param l OnStatusChangedListener
+     */
+    public void setOnStatusChangedListener(OnStatusChangedListener l) {
+        mOnStatusChangedListener = l;
     }
 
     /**
@@ -290,5 +319,9 @@ public class SmileyLoadingView extends View {
     private int dp2px(float dpValue) {
         final float scale = getContext().getResources().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);
+    }
+
+    public interface OnStatusChangedListener {
+        void onCompleted();
     }
 }
