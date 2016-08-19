@@ -11,7 +11,38 @@
     tools:context="cn.refactor.smileyloadingview.MainActivity">
 
     <cn.refactor.smileyloadingview.lib.SmileyLoadingView
+        android:id="@+id/loading_view"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_centerInParent="true"/>
+        android:layout_centerInParent="true"
+        android:padding="20dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/loading_view"
+        android:layout_marginTop="30dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="start"
+            android:text="@string/start"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="stop"
+            android:text="@string/stop"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:onClick="stopUtilAnimationCompleted"
+            android:text="@string/stop_until_animation_perform_completed"/>
+    </LinearLayout>
 </RelativeLayout>
