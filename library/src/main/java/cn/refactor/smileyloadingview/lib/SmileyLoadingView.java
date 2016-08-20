@@ -47,8 +47,10 @@ public class SmileyLoadingView extends View {
 
     private RectF mRectF;
     private float[] mCenterPos, mLeftEyePos, mRightEyePos;
-    private float mStartAngle, mSwipeAngle;
+    private float mStartAngle, mSweepAngle;
+    private float mCircleRadius, mEyeCircleRadius;
 
+    private int mAnimRepeatCount;
     private int mStrokeWidth;
     private boolean mRunning;
     private boolean mFirstStep;
@@ -80,11 +82,12 @@ public class SmileyLoadingView extends View {
 
     private void init(AttributeSet attrs) {
 
-        // // TODO: 16/8/19 默认值
+        // // get attrs
         mStrokeWidth = DEFAULT_PAINT_WIDTH;
+        mAnimRepeatCount = ValueAnimator.INFINITE; // default set anim is infinite
 
 
-        mSwipeAngle = 180; // 初始状态
+        mSweepAngle = 180; // init sweepAngle
         mCirclePath = new Path();
         mArcPath = new Path();
 
@@ -116,11 +119,11 @@ public class SmileyLoadingView extends View {
     protected void onDraw(Canvas canvas) {
         if (mRunning) {
             if (mShowLeftEye) {
-                canvas.drawCircle(mLeftEyePos[0], mLeftEyePos[1], dp2px(mStrokeWidth) / 2, mCirclePaint);
+                canvas.drawCircle(mLeftEyePos[0], mLeftEyePos[1], mEyeCircleRadius, mCirclePaint);
             }
 
             if (mShowRightEye) {
-                canvas.drawCircle(mRightEyePos[0], mRightEyePos[1], dp2px(mStrokeWidth) / 2, mCirclePaint);
+                canvas.drawCircle(mRightEyePos[0], mRightEyePos[1], mEyeCircleRadius, mCirclePaint);
             }
 
             if (mFirstStep) {
@@ -132,11 +135,11 @@ public class SmileyLoadingView extends View {
                 mRightEyePos[1] += mStrokeWidth / 4 * 3;
 
                 mArcPath.reset();
-                mArcPath.addArc(mRectF, mStartAngle, mSwipeAngle);
+                mArcPath.addArc(mRectF, mStartAngle, mSweepAngle);
                 canvas.drawPath(mArcPath, mArcPaint);
             } else {
                 mArcPath.reset();
-                mArcPath.addArc(mRectF, mStartAngle, mSwipeAngle);
+                mArcPath.addArc(mRectF, mStartAngle, mSweepAngle);
                 canvas.drawPath(mArcPath, mArcPaint);
             }
         } else {
@@ -151,7 +154,7 @@ public class SmileyLoadingView extends View {
             mRightEyePos[1] += mStrokeWidth / 4 * 3;
 
             mArcPath.reset();
-            mArcPath.addArc(mRectF, mStartAngle, mSwipeAngle);
+            mArcPath.addArc(mRectF, mStartAngle, mSweepAngle);
             canvas.drawPath(mArcPath, mArcPaint);
         }
     }
@@ -172,13 +175,14 @@ public class SmileyLoadingView extends View {
 
         float radiusX = (width - paddingRight - paddingLeft - dp2px(mStrokeWidth)) >> 1;
         float radiusY = (height - paddingTop - paddingBottom - dp2px(mStrokeWidth)) >> 1;
-        float radius = Math.min(radiusX, radiusY);
+        mCircleRadius = Math.min(radiusX, radiusY);
+        mEyeCircleRadius = dp2px(mStrokeWidth) / 2;
 
         mRectF = new RectF(paddingLeft + dp2px(mStrokeWidth), paddingTop + dp2px(mStrokeWidth),
                                 width - dp2px(mStrokeWidth) - paddingRight, height - dp2px(mStrokeWidth) - paddingBottom);
 
         mArcPath.arcTo(mRectF, 0, 180);
-        mCirclePath.addCircle(mCenterPos[0], mCenterPos[1], radius, Path.Direction.CW);
+        mCirclePath.addCircle(mCenterPos[0], mCenterPos[1], mCircleRadius, Path.Direction.CW);
         mPathMeasure = new PathMeasure(mCirclePath, true);
     }
 
@@ -201,15 +205,19 @@ public class SmileyLoadingView extends View {
     }
 
     /**
-     * Start animation
+     * set anim repeat count
+     * @param animRepeatCount anim repeat count
+     *                        value: -1 (INFINITE)
      */
-    public void start() {
+    public void start(int animRepeatCount) {
+        mAnimRepeatCount = animRepeatCount;
+
         mFirstStep = true;
 
         mValueAnimator = ValueAnimator.ofFloat(0.0f, 720.0f);
         mValueAnimator.setDuration(2000);
         mValueAnimator.setInterpolator(new LinearInterpolator());
-        mValueAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        mValueAnimator.setRepeatCount(mAnimRepeatCount);
         mValueAnimator.setRepeatMode(ValueAnimator.RESTART);
         mValueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -223,15 +231,14 @@ public class SmileyLoadingView extends View {
                 if (mFirstStep) {
                     mShowLeftEye = animatedValue > 135.0f;
                     mShowRightEye = animatedValue > 235.0f;
-                    // TODO: 16/8/19 需要计算角度 mSwipeAngle = 1;
-                    mSwipeAngle = 1;
+                    mSweepAngle = calculateFirstStepSweepAngle();
 
                     mStartAngle = (float) animation.getAnimatedValue() + 90;
                 } else {
                     mShowLeftEye = animatedValue <= 135.0f;
                     mShowRightEye = animatedValue <= 235.0f;
                     mStartAngle = (float) animation.getAnimatedValue() + 90;
-                    mSwipeAngle = animatedValue / 135.0f <= 1 ? animatedValue : (135.0f - (animatedValue - 135.0f) / 225 * 135);
+                    mSweepAngle = animatedValue / 135.0f <= 1 ? animatedValue : (135.0f - (animatedValue - 135.0f) / 225 * 135);
                 }
                 invalidate();
             }
@@ -272,6 +279,13 @@ public class SmileyLoadingView extends View {
     }
 
     /**
+     * Start animation
+     */
+    public void start() {
+        start(ValueAnimator.INFINITE);
+    }
+
+    /**
      * Stop animation
      */
     public void stop() {
@@ -307,8 +321,17 @@ public class SmileyLoadingView extends View {
      */
     private void reset() {
         mStartAngle = 0;
-        mSwipeAngle = 180;
+        mSweepAngle = 180;
         invalidate();
+    }
+
+    /**
+     * set arc sweep angle when the step is first
+     */
+    private float calculateFirstStepSweepAngle() {
+        // TODO: 16/8/20 calculateFirstStepSweepAngle
+        //return (float) (180 * Math.asin(mEyeCircleRadius / mCircleRadius)/ Math.PI);
+        return 1;
     }
 
     /**
