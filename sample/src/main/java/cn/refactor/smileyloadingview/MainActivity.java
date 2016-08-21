@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        seekBar.setProgress(0xFF);
     }
 
     public void showView(View v) {

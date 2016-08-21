@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -38,6 +39,7 @@ import android.view.animation.LinearInterpolator;
  */
 public class SmileyLoadingView extends View {
 
+    private static final int DEFAULT_ANIM_DURATION = 2000;
     private static final int DEFAULT_PAINT_WIDTH = 5;
     private static final int DEFAULT_PAINT_COLOR = Color.parseColor("#b3d8f3");
 
@@ -49,6 +51,9 @@ public class SmileyLoadingView extends View {
     private float[] mCenterPos, mLeftEyePos, mRightEyePos;
     private float mStartAngle, mSweepAngle;
     private float mCircleRadius, mEyeCircleRadius;
+
+    private int mStrokeColor;
+    private int mAnimDuration;
 
     private int mAnimRepeatCount;
     private int mStrokeWidth;
@@ -83,9 +88,12 @@ public class SmileyLoadingView extends View {
     private void init(AttributeSet attrs) {
 
         // // get attrs
-        mStrokeWidth = DEFAULT_PAINT_WIDTH;
-        mAnimRepeatCount = ValueAnimator.INFINITE; // default set anim is infinite
-
+        TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.SmileyLoadingView);
+        mStrokeColor = ta.getColor(R.styleable.SmileyLoadingView_strokeColor, DEFAULT_PAINT_COLOR);
+        mStrokeWidth = ta.getDimensionPixelSize(R.styleable.SmileyLoadingView_strokeWidth, dp2px(DEFAULT_PAINT_WIDTH));
+        mAnimDuration = ta.getInt(R.styleable.SmileyLoadingView_duration, DEFAULT_ANIM_DURATION);
+        mAnimRepeatCount = ta.getInt(R.styleable.SmileyLoadingView_animRepeatCount, ValueAnimator.INFINITE);
+        ta.recycle();
 
         mSweepAngle = 180; // init sweepAngle
         mCirclePath = new Path();
@@ -95,15 +103,15 @@ public class SmileyLoadingView extends View {
         mArcPaint.setStyle(Paint.Style.STROKE);
         mArcPaint.setStrokeCap(Paint.Cap.ROUND);
         mArcPaint.setStrokeJoin(Paint.Join.ROUND);
-        mArcPaint.setStrokeWidth(dp2px(DEFAULT_PAINT_WIDTH));
-        mArcPaint.setColor(DEFAULT_PAINT_COLOR);
+        mArcPaint.setStrokeWidth(mStrokeWidth);
+        mArcPaint.setColor(mStrokeColor);
 
         mCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mCirclePaint.setStyle(Paint.Style.STROKE);
         mCirclePaint.setStrokeCap(Paint.Cap.ROUND);
         mCirclePaint.setStrokeJoin(Paint.Join.ROUND);
         mCirclePaint.setStyle(Paint.Style.FILL);
-        mCirclePaint.setColor(DEFAULT_PAINT_COLOR);
+        mCirclePaint.setColor(mStrokeColor);
 
         mCenterPos = new float[2];
         mLeftEyePos = new float[2];
@@ -127,13 +135,6 @@ public class SmileyLoadingView extends View {
             }
 
             if (mFirstStep) {
-                mPathMeasure.getPosTan(mPathMeasure.getLength() / 8 * 5, mLeftEyePos, null);
-                mPathMeasure.getPosTan(mPathMeasure.getLength() / 8 * 7, mRightEyePos, null);
-                mLeftEyePos[0] += mStrokeWidth / 4 * 3;
-                mLeftEyePos[1] += mStrokeWidth / 4 * 3;
-                mRightEyePos[0] -= mStrokeWidth / 4 * 3;
-                mRightEyePos[1] += mStrokeWidth / 4 * 3;
-
                 mArcPath.reset();
                 mArcPath.addArc(mRectF, mStartAngle, mSweepAngle);
                 canvas.drawPath(mArcPath, mArcPaint);
@@ -143,15 +144,8 @@ public class SmileyLoadingView extends View {
                 canvas.drawPath(mArcPath, mArcPaint);
             }
         } else {
-            canvas.drawCircle(mLeftEyePos[0], mLeftEyePos[1], dp2px(mStrokeWidth) / 2, mCirclePaint);
-            canvas.drawCircle(mRightEyePos[0], mRightEyePos[1], dp2px(mStrokeWidth) / 2, mCirclePaint);
-
-            mPathMeasure.getPosTan(mPathMeasure.getLength() / 8 * 5, mLeftEyePos, null);
-            mPathMeasure.getPosTan(mPathMeasure.getLength() / 8 * 7, mRightEyePos, null);
-            mLeftEyePos[0] += mStrokeWidth / 4 * 3;
-            mLeftEyePos[1] += mStrokeWidth / 4 * 3;
-            mRightEyePos[0] -= mStrokeWidth / 4 * 3;
-            mRightEyePos[1] += mStrokeWidth / 4 * 3;
+            canvas.drawCircle(mLeftEyePos[0], mLeftEyePos[1], mEyeCircleRadius, mCirclePaint);
+            canvas.drawCircle(mRightEyePos[0], mRightEyePos[1], mEyeCircleRadius, mCirclePaint);
 
             mArcPath.reset();
             mArcPath.addArc(mRectF, mStartAngle, mSweepAngle);
@@ -173,17 +167,24 @@ public class SmileyLoadingView extends View {
         mCenterPos[1] = (height - paddingBottom + paddingTop) >> 1;
 
 
-        float radiusX = (width - paddingRight - paddingLeft - dp2px(mStrokeWidth)) >> 1;
-        float radiusY = (height - paddingTop - paddingBottom - dp2px(mStrokeWidth)) >> 1;
+        float radiusX = (width - paddingRight - paddingLeft - mStrokeWidth) >> 1;
+        float radiusY = (height - paddingTop - paddingBottom - mStrokeWidth) >> 1;
         mCircleRadius = Math.min(radiusX, radiusY);
-        mEyeCircleRadius = dp2px(mStrokeWidth) / 2;
+        mEyeCircleRadius = mStrokeWidth / 2;
 
-        mRectF = new RectF(paddingLeft + dp2px(mStrokeWidth), paddingTop + dp2px(mStrokeWidth),
-                                width - dp2px(mStrokeWidth) - paddingRight, height - dp2px(mStrokeWidth) - paddingBottom);
+        mRectF = new RectF(paddingLeft + mStrokeWidth, paddingTop + mStrokeWidth,
+                                width - mStrokeWidth - paddingRight, height - mStrokeWidth - paddingBottom);
 
         mArcPath.arcTo(mRectF, 0, 180);
         mCirclePath.addCircle(mCenterPos[0], mCenterPos[1], mCircleRadius, Path.Direction.CW);
         mPathMeasure = new PathMeasure(mCirclePath, true);
+
+        mPathMeasure.getPosTan(mPathMeasure.getLength() / 8 * 5, mLeftEyePos, null);
+        mPathMeasure.getPosTan(mPathMeasure.getLength() / 8 * 7, mRightEyePos, null);
+        mLeftEyePos[0] += mStrokeWidth >> 2;
+        mLeftEyePos[1] += mStrokeWidth >> 1;
+        mRightEyePos[0] -= mStrokeWidth >> 2;
+        mRightEyePos[1] += mStrokeWidth >> 1;
     }
 
     @Override
@@ -205,6 +206,39 @@ public class SmileyLoadingView extends View {
     }
 
     /**
+     * Set paint stroke color
+     * @param color color
+     */
+    public void setStrokeColor(int color) {
+        mStrokeColor = color;
+        invalidate();
+    }
+
+    /**
+     * Set paint stroke width
+     * @param width px
+     */
+    public void setStrokeWidth(int width) {
+        mStrokeWidth = width;
+    }
+
+    /**
+     * Set animation running duration
+     * @param duration duration
+     */
+    public void setAnimDuration(int duration) {
+        mAnimDuration = duration;
+    }
+
+    /**
+     * Set animation repeat count, ValueAnimator.INFINITE(-1) means cycle
+     * @param repeatCount repeat count
+     */
+    public void setAnimRepeatCount(int repeatCount) {
+        mAnimRepeatCount = repeatCount;
+    }
+
+    /**
      * set anim repeat count
      * @param animRepeatCount anim repeat count
      *                        value: -1 (INFINITE)
@@ -215,7 +249,7 @@ public class SmileyLoadingView extends View {
         mFirstStep = true;
 
         mValueAnimator = ValueAnimator.ofFloat(0.0f, 720.0f);
-        mValueAnimator.setDuration(2000);
+        mValueAnimator.setDuration(mAnimDuration);
         mValueAnimator.setInterpolator(new LinearInterpolator());
         mValueAnimator.setRepeatCount(mAnimRepeatCount);
         mValueAnimator.setRepeatMode(ValueAnimator.RESTART);
@@ -293,7 +327,8 @@ public class SmileyLoadingView extends View {
     }
 
     /**
-     * @param stopUntilAnimationPerformCompleted 是否最后一次动画执行完毕后 才结束。
+     * stop it after animation perform completed
+     * @param stopUntilAnimationPerformCompleted boolean
      */
     public void stop(boolean stopUntilAnimationPerformCompleted) {
         mStopUntilAnimationPerformCompleted = stopUntilAnimationPerformCompleted;
@@ -309,7 +344,7 @@ public class SmileyLoadingView extends View {
     }
 
     /**
-     * set listener
+     * set status changed listener
      * @param l OnStatusChangedListener
      */
     public void setOnStatusChangedListener(OnStatusChangedListener l) {
@@ -344,6 +379,9 @@ public class SmileyLoadingView extends View {
         return (int) (dpValue * scale + 0.5f);
     }
 
+    /**
+     * Callback
+     */
     public interface OnStatusChangedListener {
         void onCompleted();
     }

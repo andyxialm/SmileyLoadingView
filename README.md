@@ -1,8 +1,26 @@
 #SmileyLoadingView
 
-###Wait a minute. :smiley:
+A custom loading view, just like alipay.
 
-## License
+![](https://github.com/andyxialm/SmileyLoadingView/blob/master/art/screenshot.gif?raw=true)
+
+### Usage
+	
+##### Edit your layout XML:
+
+~~~ xml
+<cn.refactor.smileyloadingview.lib.SmileyLoadingView
+        xmlns:slv="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/loading_view"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="100dp"
+        slv:strokeWidth="4dp"
+        slv:duration="2000"/>
+~~~
+
+### License
 
     Copyright 2016 andy
 

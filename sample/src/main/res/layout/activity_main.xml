@@ -8,11 +8,14 @@
     tools:context="cn.refactor.smileyloadingview.MainActivity">
 
     <cn.refactor.smileyloadingview.lib.SmileyLoadingView
+        xmlns:slv="http://schemas.android.com/apk/res-auto"
         android:id="@+id/loading_view"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="100dp"/>
+        android:layout_marginTop="100dp"
+        slv:strokeWidth="4dp"
+        slv:duration="2000"/>
 
     <LinearLayout
         android:layout_width="match_parent"
