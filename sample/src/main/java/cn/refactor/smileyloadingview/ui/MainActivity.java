@@ -1,15 +1,22 @@
-package cn.refactor.smileyloadingview;
+package cn.refactor.smileyloadingview.ui;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.SeekBar;
 
+import cn.refactor.smileyloadingview.R;
+import cn.refactor.smileyloadingview.header.SmileyLoadingViewHeader;
 import cn.refactor.smileyloadingview.lib.SmileyLoadingView;
+import in.srain.cube.views.ptr.PtrFrameLayout;
+import in.srain.cube.views.ptr.PtrHandler;
 
 public class MainActivity extends AppCompatActivity {
 
     private SmileyLoadingView mSmileyLoadingView;
+    private PtrFrameLayout mPtrFrameLayout;
+
+    private SmileyLoadingViewHeader mHeaderView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mSmileyLoadingView = (SmileyLoadingView) findViewById(R.id.loading_view);
-        mSmileyLoadingView.setOnStatusChangedListener(new SmileyLoadingView.OnStatusChangedListener() {
+        mSmileyLoadingView.setOnAnimPerformCompletedListener(new SmileyLoadingView.OnAnimPerformCompletedListener() {
             @Override
             public void onCompleted() {
                 mSmileyLoadingView.setVisibility(View.INVISIBLE);
@@ -29,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mSmileyLoadingView.setAlpha(progress);
+                mSmileyLoadingView.setPaintAlpha(progress);
             }
 
             @Override
@@ -43,6 +50,34 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         seekBar.setProgress(0xFF);
+
+
+        mPtrFrameLayout = (PtrFrameLayout) findViewById(R.id.ptr_frame_layout);
+        mHeaderView = new SmileyLoadingViewHeader(this);
+        mPtrFrameLayout.setHeaderView(mHeaderView);
+        mPtrFrameLayout.setRatioOfHeaderHeightToRefresh(1.2f);
+        mPtrFrameLayout.addPtrUIHandler(mHeaderView);
+        mPtrFrameLayout.setPtrHandler(new PtrHandler() {
+            @Override
+            public boolean checkCanDoRefresh(PtrFrameLayout frame, View content, View header) {
+                return true;
+            }
+
+            @Override
+            public void onRefreshBegin(PtrFrameLayout frame) {
+                refresh();
+            }
+        });
+    }
+
+    private void refresh() {
+        mPtrFrameLayout.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mHeaderView.onUIRefreshComplete(mPtrFrameLayout);
+                mPtrFrameLayout.refreshComplete();
+            }
+        }, 3000);
     }
 
     public void showView(View v) {
