@@ -80,6 +80,7 @@ public class SmileyLoadingViewHeader extends FrameLayout implements PtrUIHandler
         mLoadingView.setPaintAlpha(ptrIndicator.getCurrentPercent() >= 1 ? 0xFF : (int) (ptrIndicator.getCurrentPercent() * 0xFF));
     }
 
+    @SuppressWarnings("unused")
     private void executeLoadingViewAnim() {
         AlphaAnimation alphaAnimation = new AlphaAnimation(0.0f, 1.0f);
         alphaAnimation.setInterpolator(new AccelerateInterpolator());

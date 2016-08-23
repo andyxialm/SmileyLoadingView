@@ -50,18 +50,19 @@ public class SmileyLoadingView extends View {
     private RectF mRectF;
     private float[] mCenterPos, mLeftEyePos, mRightEyePos;
     private float mStartAngle, mSweepAngle;
-    private float mEyeCircleRadius;
 
+    private float mEyeCircleRadius;
     private int mStrokeColor;
     private int mAnimDuration;
 
     private int mAnimRepeatCount;
     private int mStrokeWidth;
     private boolean mRunning;
+
     private boolean mStoping;
     private boolean mFirstStep;
-
     private boolean mShowLeftEye, mShowRightEye;
+
     private boolean mStopUntilAnimationPerformCompleted;
     private OnAnimPerformCompletedListener mOnAnimPerformCompletedListener;
 
@@ -126,8 +127,6 @@ public class SmileyLoadingView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        //canvas.rotate(ROTATE_OFFSET, mCenterPos[0], mCenterPos[1]);
-
         if (mRunning) {
             if (mShowLeftEye) {
                 canvas.drawCircle(mLeftEyePos[0], mLeftEyePos[1], mEyeCircleRadius, mCirclePaint);
