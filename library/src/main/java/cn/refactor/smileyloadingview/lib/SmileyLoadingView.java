@@ -391,9 +391,11 @@ public class SmileyLoadingView extends View {
      * @param stopUntilAnimationPerformCompleted boolean
      */
     public void stop(boolean stopUntilAnimationPerformCompleted) {
-        if (mStopping) {
+        if (mStopping || mValueAnimator == null || !mValueAnimator.isRunning()) {
             return;
         }
+        mStopping = stopUntilAnimationPerformCompleted;
+
         mStopUntilAnimationPerformCompleted = stopUntilAnimationPerformCompleted;
         if (mValueAnimator != null && mValueAnimator.isRunning()) {
             if (!stopUntilAnimationPerformCompleted) {
