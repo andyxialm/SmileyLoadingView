@@ -3,5 +3,7 @@
     <string name="showView">Show View</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
-    <string name="stop_until_animation_perform_completed">StopUtilAnimationCompleted</string>
+    <string name="stop_until_animation_perform_completed">Stop until animation completed</string>
+    <string name="sample">Sample</string>
+    <string name="pull_to_refresh">Pull To Refresh</string>
 </resources>

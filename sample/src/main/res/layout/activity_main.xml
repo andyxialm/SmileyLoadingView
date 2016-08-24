@@ -1,73 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<in.srain.cube.views.ptr.PtrFrameLayout
-    android:id="@+id/ptr_frame_layout"
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:cube_ptr="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
-    cube_ptr:ptr_duration_to_close="300"
-    cube_ptr:ptr_duration_to_close_header="2000"
-    cube_ptr:ptr_keep_header_when_refresh="true"
-    cube_ptr:ptr_pull_to_fresh="false"
-    cube_ptr:ptr_ratio_of_header_height_to_refresh="1.2"
-    cube_ptr:ptr_resistance="2.0">
+    android:background="@android:color/white"
+    android:gravity="center"
+    android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/white"
-        android:orientation="vertical"
-        android:paddingTop="100dp">
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="gotoSample"
+        android:text="@string/sample"/>
 
-        <cn.refactor.smileyloadingview.lib.SmileyLoadingView
-            android:id="@+id/loading_view"
-            xmlns:slv="http://schemas.android.com/apk/res-auto"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_gravity="center_horizontal"
-            slv:duration="2000"
-            slv:strokeWidth="4dp"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:onClick="gotoPullToRefresh"
+        android:text="@string/pull_to_refresh"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/loading_view"
-            android:layout_marginTop="30dp"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
-
-            <SeekBar
-                android:id="@+id/seek_bar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="showView"
-                android:text="@string/showView"/>
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:onClick="start"
-                android:text="@string/start"/>
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:onClick="stop"
-                android:text="@string/stop"/>
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:onClick="stopUtilAnimationCompleted"
-                android:text="@string/stop_until_animation_perform_completed"/>
-        </LinearLayout>
-    </LinearLayout>
-</in.srain.cube.views.ptr.PtrFrameLayout>
+</LinearLayout>

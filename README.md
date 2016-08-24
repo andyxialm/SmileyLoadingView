@@ -12,8 +12,8 @@ A custom loading view, just like alipay.
 <cn.refactor.smileyloadingview.lib.SmileyLoadingView
             android:id="@+id/loading_view"
             xmlns:slv="http://schemas.android.com/apk/res-auto"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             slv:duration="2000"
             slv:strokeWidth="4dp"/>
 ~~~

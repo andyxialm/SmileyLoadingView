@@ -39,33 +39,35 @@ import android.view.animation.LinearInterpolator;
  */
 public class SmileyLoadingView extends View {
 
-    private static final int DEFAULT_ANIM_DURATION = 2000;
-    private static final int DEFAULT_PAINT_WIDTH = 5;
-    private static final int DEFAULT_PAINT_COLOR = Color.parseColor("#b3d8f3");
+    private static final int DEFAULT_WIDHT         = 30;
+    private static final int DEFAULT_HEIGHT        = 30;
+    private static final int DEFAULT_PAINT_WIDTH   = 5;
 
-    private static final int ROTATE_OFFSET = 90;
+    private static final int DEFAULT_ANIM_DURATION = 2000;
+    private static final int DEFAULT_PAINT_COLOR   = Color.parseColor("#b3d8f3");
+    private static final int ROTATE_OFFSET         = 90;
+
     private Paint mArcPaint, mCirclePaint;
     private Path  mCirclePath, mArcPath;
-
     private RectF mRectF;
+
     private float[] mCenterPos, mLeftEyePos, mRightEyePos;
     private float mStartAngle, mSweepAngle;
-
     private float mEyeCircleRadius;
+
     private int mStrokeColor;
     private int mAnimDuration;
-
     private int mAnimRepeatCount;
+
     private int mStrokeWidth;
     private boolean mRunning;
+    private boolean mStopping;
 
-    private boolean mStoping;
     private boolean mFirstStep;
     private boolean mShowLeftEye, mShowRightEye;
-
     private boolean mStopUntilAnimationPerformCompleted;
-    private OnAnimPerformCompletedListener mOnAnimPerformCompletedListener;
 
+    private OnAnimPerformCompletedListener mOnAnimPerformCompletedListener;
     private ValueAnimator mValueAnimator;
 
     public SmileyLoadingView(Context context) {
@@ -123,6 +125,7 @@ public class SmileyLoadingView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        setMeasuredDimension(measureWidthSize(widthMeasureSpec), measureHeightSize(heightMeasureSpec));
     }
 
     @Override
@@ -153,6 +156,52 @@ public class SmileyLoadingView extends View {
             mArcPath.addArc(mRectF, mStartAngle, mSweepAngle);
             canvas.drawPath(mArcPath, mArcPaint);
         }
+    }
+
+    /**
+     * measure width
+     * @param measureSpec spec
+     * @return width
+     */
+    private int measureWidthSize(int measureSpec) {
+        int defSize = dp2px(DEFAULT_WIDHT);
+        int specSize = MeasureSpec.getSize(measureSpec);
+        int specMode = MeasureSpec.getMode(measureSpec);
+
+        int result = 0;
+        switch (specMode) {
+            case MeasureSpec.UNSPECIFIED:
+            case MeasureSpec.AT_MOST:
+                result = Math.min(defSize, specSize);
+                break;
+            case MeasureSpec.EXACTLY:
+                result = specSize;
+                break;
+        }
+        return result;
+    }
+
+    /**
+     * measure height
+     * @param measureSpec spec
+     * @return height
+     */
+    private int measureHeightSize(int measureSpec) {
+        int defSize = dp2px(DEFAULT_HEIGHT);
+        int specSize = MeasureSpec.getSize(measureSpec);
+        int specMode = MeasureSpec.getMode(measureSpec);
+
+        int result = 0;
+        switch (specMode) {
+            case MeasureSpec.UNSPECIFIED:
+            case MeasureSpec.AT_MOST:
+                result = Math.min(defSize, specSize);
+                break;
+            case MeasureSpec.EXACTLY:
+                result = specSize;
+                break;
+        }
+        return result;
     }
 
     @Override
@@ -252,7 +301,7 @@ public class SmileyLoadingView extends View {
 
         mFirstStep = true;
 
-        mValueAnimator = ValueAnimator.ofFloat(ROTATE_OFFSET, 720.0f + ROTATE_OFFSET);
+        mValueAnimator = ValueAnimator.ofFloat(ROTATE_OFFSET, 720.0f + 2 * ROTATE_OFFSET);
         mValueAnimator.setDuration(mAnimDuration);
         mValueAnimator.setInterpolator(new LinearInterpolator());
         mValueAnimator.setRepeatCount(mAnimRepeatCount);
@@ -268,13 +317,20 @@ public class SmileyLoadingView extends View {
                 if (mFirstStep) {
                     mShowLeftEye = animatedValue % 360 > 225.0f;
                     mShowRightEye = animatedValue % 360 > 315.0f;
-                    mSweepAngle = calculateFirstStepSweepAngle();
+
+                    // set arc sweep angle when the step is first, set value: 0.1f similar to a circle
+                    mSweepAngle = 0.1f;
                     mStartAngle = (float) animation.getAnimatedValue();
                 } else {
                     mShowLeftEye = (animatedValue / 360.0f <= 2) && animatedValue % 360 <= 225.0f;
                     mShowRightEye = (animatedValue / 360.0f <= 2) && animatedValue % 360 <= 315.0f;
-                    mStartAngle = (animatedValue / 360.0f <= 1.625) ? 0 : animatedValue - mSweepAngle - 360;
-                    mSweepAngle = (animatedValue / 360.0f <= 1.625) ? animatedValue % 360 : 225 - (animatedValue - 225 - 360);
+                    if (animatedValue >= (720.0f + ROTATE_OFFSET)) {
+                        mStartAngle = (animatedValue - (720.0f + ROTATE_OFFSET));
+                        mSweepAngle = ROTATE_OFFSET - mStartAngle;
+                    } else {
+                        mStartAngle = (animatedValue / 360.0f <= 1.625) ? 0 : animatedValue - mSweepAngle - 360;
+                        mSweepAngle = (animatedValue / 360.0f <= 1.625) ? animatedValue % 360 : 225 - (animatedValue - 225 - 360) / 5 * 3;
+                    }
                 }
                 invalidate();
             }
@@ -288,7 +344,7 @@ public class SmileyLoadingView extends View {
             @Override
             public void onAnimationEnd(Animator animation) {
                 mRunning = false;
-                mStoping = false;
+                mStopping = false;
                 if (mOnAnimPerformCompletedListener != null) {
                     mOnAnimPerformCompletedListener.onCompleted();
                 }
@@ -298,7 +354,7 @@ public class SmileyLoadingView extends View {
             @Override
             public void onAnimationCancel(Animator animation) {
                 mRunning = false;
-                mStoping = false;
+                mStopping = false;
                 if (mOnAnimPerformCompletedListener != null) {
                     mOnAnimPerformCompletedListener.onCompleted();
                 }
@@ -335,7 +391,7 @@ public class SmileyLoadingView extends View {
      * @param stopUntilAnimationPerformCompleted boolean
      */
     public void stop(boolean stopUntilAnimationPerformCompleted) {
-        if (mStoping) {
+        if (mStopping) {
             return;
         }
         mStopUntilAnimationPerformCompleted = stopUntilAnimationPerformCompleted;
@@ -344,7 +400,7 @@ public class SmileyLoadingView extends View {
                 mValueAnimator.end();
             }
         } else {
-            mStoping = false;
+            mStopping = false;
             if (mOnAnimPerformCompletedListener != null) {
                 mOnAnimPerformCompletedListener.onCompleted();
             }
@@ -366,15 +422,6 @@ public class SmileyLoadingView extends View {
         mStartAngle = 0;
         mSweepAngle = 180;
         invalidate();
-    }
-
-    /**
-     * set arc sweep angle when the step is first
-     */
-    private float calculateFirstStepSweepAngle() {
-        // TODO: 16/8/22 need precise calculation
-        //return 4 * (float) (180 * Math.asin((mEyeCircleRadius / 2) / mCircleRadius) / Math.PI);
-        return 0.1f;
     }
 
     /**
