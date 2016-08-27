@@ -39,7 +39,7 @@ import android.view.animation.LinearInterpolator;
  */
 public class SmileyLoadingView extends View {
 
-    private static final int DEFAULT_WIDHT         = 30;
+    private static final int DEFAULT_WIDTH = 30;
     private static final int DEFAULT_HEIGHT        = 30;
     private static final int DEFAULT_PAINT_WIDTH   = 5;
 
@@ -164,7 +164,7 @@ public class SmileyLoadingView extends View {
      * @return width
      */
     private int measureWidthSize(int measureSpec) {
-        int defSize = dp2px(DEFAULT_WIDHT);
+        int defSize = dp2px(DEFAULT_WIDTH);
         int specSize = MeasureSpec.getSize(measureSpec);
         int specMode = MeasureSpec.getMode(measureSpec);
 
