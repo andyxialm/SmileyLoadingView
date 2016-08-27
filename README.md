@@ -1,8 +1,8 @@
 #SmileyLoadingView
 
-A custom loading view, just like alipay.
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-SmileyLoadingView-green.svg?style=true)](https://android-arsenal.com/details/1/4234)
 
-![](https://github.com/andyxialm/SmileyLoadingView/blob/master/art/screenshot.gif?raw=true)
+A custom loading view, just like alipay.
 
 ### Usage
 	
