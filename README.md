@@ -4,6 +4,7 @@
 
 A custom loading view, just like alipay.
 
+![](https://github.com/andyxialm/SmileyLoadingView/blob/master/art/screenshot.gif?raw=true)
 ### Usage
 	
 ##### Edit your layout XML:
